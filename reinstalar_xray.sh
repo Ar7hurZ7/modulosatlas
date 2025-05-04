@@ -1,69 +1,105 @@
 #!/bin/bash
 
-# Spinner para mostrar animação durante processos em background
-spinner() {
-    local pid=$!
-    local delay=0.1
-    local spinstr='|/-\'
-    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
+clear
+echo -e "\e[1;36m🔁 Iniciando reinstalação do Xray...\e[0m"
+sleep 1
+
+# Função de animação de carregamento
+loading_animation() {
+    local message=$1
+    local duration=$2
+    local i=0
+    local spin='-\|/'
+
+    echo -ne "$message "
+    while [ $i -lt $duration ]; do
+        for j in $(seq 0 3); do
+            echo -ne "\b${spin:$j:1}"
+            sleep 0.1
+        done
+        i=$((i + 1))
     done
-    printf "    \b\b\b\b"
+    echo -ne "\b✔️"
+    echo
 }
 
-# Solicita a porta ao usuário
-read -p "Digite a porta desejada para o Xray: " PORTA
+# Etapas de limpeza
+loading_animation "⏹️ Parando serviço Xray" 10
+sudo systemctl stop xray &>/dev/null
 
-echo "🧹 Removendo instalação anterior do Xray..."
-(
-    sudo systemctl stop xray
-    sudo systemctl disable xray
-    sudo rm -f /usr/local/bin/xray
-    sudo rm -rf /usr/local/etc/xray
-    sudo rm -f /etc/systemd/system/xray.service
-    sudo rm -f /etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf
-) & spinner
+loading_animation "🧹 Limpando instalação anterior" 15
+sudo systemctl disable xray &>/dev/null
+sudo rm -f /usr/local/bin/xray
+sudo rm -rf /usr/local/etc/xray
+sudo rm -f /etc/systemd/system/xray.service
+sudo rm -f /etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf
 
-echo "📥 Instalando nova versão do Xray..."
-(bash <(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh) install) & spinner
+# Reinstalação
+loading_animation "⬇️ Instalando Xray" 20
+bash <(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh) install &>/dev/null
 
-echo "📁 Criando diretório de configuração alternativo..."
+# Configuração personalizada
+loading_animation "📁 Criando diretório /etc/v2ray" 5
 sudo mkdir -p /etc/v2ray
 
-echo "⚙️ Salvando novo config.json..."
+read -p "🛠️ Digite a porta que deseja usar para o Xray (ex: 8002): " PORTA
+
 cat <<EOF | sudo tee /etc/v2ray/config.json > /dev/null
 {
   "api": {
-    "services": ["HandlerService", "LoggerService", "StatsService"],
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ],
     "tag": "api"
   },
+  "burstObservatory": null,
+  "dns": null,
+  "fakedns": null,
   "inbounds": [
     {
+      "allocate": null,
       "listen": "127.0.0.1",
       "port": 1085,
       "protocol": "dokodemo-door",
       "settings": {
         "address": "127.0.0.1"
       },
+      "sniffing": null,
+      "streamSettings": null,
       "tag": "api"
     },
     {
+      "allocate": {
+        "concurrency": 3,
+        "refresh": 5,
+        "strategy": "always"
+      },
+      "listen": null,
       "port": $PORTA,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
-            "id": "4c4326a8-830d-4496-aad8-392fd624ff47",
             "email": "xxx9",
+            "id": "4c4326a8-830d-4496-aad8-392fd624ff47",
             "level": 0
           }
         ],
         "decryption": "none",
         "fallbacks": []
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "quic",
+          "fakedns"
+        ],
+        "enabled": false,
+        "metadataOnly": false,
+        "routeOnly": false
       },
       "streamSettings": {
         "network": "xhttp",
@@ -72,6 +108,7 @@ cat <<EOF | sudo tee /etc/v2ray/config.json > /dev/null
           "headers": {},
           "host": "",
           "mode": "auto",
+          "noSSEHeader": false,
           "path": "/",
           "scMaxBufferedPosts": 30,
           "scMaxEachPostBytes": "1000000",
@@ -79,39 +116,76 @@ cat <<EOF | sudo tee /etc/v2ray/config.json > /dev/null
           "xPaddingBytes": "100-1000"
         }
       },
-      "sniffing": {
-        "enabled": false,
-        "destOverride": ["http", "tls", "quic", "fakedns"]
-      },
       "tag": "inbound-sshplus"
     }
   ],
   "log": {
     "access": "/var/log/v2ray/access.log",
+    "dnsLog": false,
     "error": "/var/log/v2ray/error.log",
-    "loglevel": "info"
+    "loglevel": "info",
+    "maskAddress": ""
   },
+  "observatory": null,
   "outbounds": [
-    {"protocol": "freedom", "settings": {}, "tag": "direct"},
-    {"protocol": "blackhole", "settings": {}, "tag": "blocked"}
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    }
   ],
   "policy": {
-    "levels": {"0": {"statsUserDownlink": true, "statsUserUplink": true}},
-    "system": {"statsInboundDownlink": true, "statsInboundUplink": true}
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": false,
+      "statsOutboundUplink": false
+    }
   },
+  "reverse": null,
   "routing": {
     "domainStrategy": "AsIs",
     "rules": [
-      {"inboundTag": ["api"], "outboundTag": "api", "type": "field"},
-      {"ip": ["geoip:private"], "outboundTag": "blocked", "type": "field"},
-      {"outboundTag": "blocked", "protocol": ["bittorrent"], "type": "field"}
+      {
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api",
+        "type": "field"
+      },
+      {
+        "ip": [
+          "geoip:private"
+        ],
+        "outboundTag": "blocked",
+        "type": "field"
+      },
+      {
+        "outboundTag": "blocked",
+        "protocol": [
+          "bittorrent"
+        ],
+        "type": "field"
+      }
     ]
   },
-  "stats": {}
+  "stats": {},
+  "transport": null
 }
 EOF
 
-echo "🔧 Atualizando serviço systemd..."
+# Serviço systemd
 cat <<EOF | sudo tee /etc/systemd/system/xray.service > /dev/null
 [Unit]
 Description=Xray Service
@@ -133,12 +207,14 @@ LimitNOFILE=1000000
 WantedBy=multi-user.target
 EOF
 
-echo "🔐 Corrigindo permissões do config.json..."
+# Permissões
 chmod 644 /etc/v2ray/config.json
 
-echo "🔁 Reiniciando Xray..."
+# Ativação
+loading_animation "🔁 Reiniciando serviço Xray" 10
 sudo systemctl daemon-reload
 sudo systemctl enable xray
 sudo systemctl restart xray
 
-echo "✅ Xray reinstalado e configurado com sucesso!"
+# Mensagem final
+echo -e "\n✅ \e[1;32mXray reinstalado com sucesso!\e[0m"
