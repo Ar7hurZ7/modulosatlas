@@ -1,7 +1,7 @@
 #!/bin/bash
 
 clear
-echo -e "\e[1;36m🔁 Iniciando reinstalação do Xray...\e[0m"
+echo -e "\e[1;36m🔁 Iniciando instalação do Xray...\e[0m"
 sleep 1
 
 # Função de animação de carregamento
@@ -39,7 +39,7 @@ loading_animation "⬇️ Instalando Xray" 20
 bash <(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh) install &>/dev/null
 
 # Configuração personalizada
-loading_animation "📁 Criando diretório /etc/v2ray" 5
+loading_animation "📁 Criando diretório " 5
 sudo mkdir -p /etc/v2ray
 
 read -p "🛠️ Digite a porta que deseja usar para o Xray (ex: 8002): " PORTA
@@ -217,4 +217,4 @@ sudo systemctl enable xray
 sudo systemctl restart xray
 
 # Mensagem final
-echo -e "\n✅ \e[1;32mXray reinstalado com sucesso!\e[0m"
+echo -e "\n✅ \e[1;32mXray instalado com sucesso!\e[0m"
