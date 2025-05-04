@@ -34,7 +34,7 @@ sudo rm -rf /usr/local/etc/xray
 sudo rm -f /etc/systemd/system/xray.service
 sudo rm -f /etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf
 
-# Reinstalação
+# instalação
 loading_animation "⬇️ Instalando Xray" 20
 bash <(curl -Ls https://github.com/XTLS/Xray-install/raw/main/install-release.sh) install &>/dev/null
 
