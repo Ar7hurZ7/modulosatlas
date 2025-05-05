@@ -11,7 +11,7 @@ wget -O atlasremove.sh "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/
 wget -O delete.py "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/refs/heads/main/delete.py"
 wget -O atlasdata.sh "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/refs/heads/main/atlasdata.sh"
 wget -O sincronizar.py "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/refs/heads/main/sincronizar.py"
-wget -O sincronizar.py "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/refs/heads/main/atlastestev2.sh"
+wget -O atlastestev2.sh "https://raw.githubusercontent.com/Ar7hurZ7/modulosatlas/refs/heads/main/atlastestev2.sh"
 chmod 777 atlascreate.sh add.sh remsinc.sh addsinc.sh rem.sh atlasteste.sh addteste.sh atlasremove.sh delete.py atlasdata.sh sincronizar.py
 apt install dos2unix
 dos2unix rem.sh
