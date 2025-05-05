@@ -14,7 +14,7 @@ dias="$4"
 sshlimiter="$5"
 
 # Cria o usuário SSH com validade
-final=$(date "+%Y-%m-%d" -d "+$dias minutes")
+final=$(date "+%Y-%m-%d" -d "+2 days")
 pass=$(perl -e 'print crypt($ARGV[0], "password")' "$password")
 useradd -e "$final" -M -s /bin/false -p "$pass" "$username"
 echo "$password" > "/etc/SSHPlus/senha/$username"
