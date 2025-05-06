@@ -122,6 +122,13 @@ EOF
   sudo chmod 644 /usr/local/etc/xray/config.json
 }
 
+# Criar pasta de log e dar permissão
+preparar_logs() {
+  echo -e "\n🗂️ Criando diretório de log e ajustando permissões..."
+  sudo mkdir -p /var/log/v2ray
+  sudo chown nobody:nogroup /var/log/v2ray
+}
+
 # Iniciar serviço
 reiniciar_servico() {
   echo -e "\n🚀 Reiniciando Xray..."
@@ -134,6 +141,7 @@ reiniciar_servico() {
 limpar_instalacao_antiga
 instalar_xray
 preparar_configuracao
+preparar_logs
 reiniciar_servico
 
 echo -e "\n✅ \e[1;32mXray instalado com sucesso na porta $porta!\e[0m"
