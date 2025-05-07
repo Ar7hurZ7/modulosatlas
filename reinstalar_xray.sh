@@ -143,5 +143,10 @@ instalar_xray
 preparar_configuracao
 preparar_logs
 reiniciar_servico
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl restart xray
+sudo systemctl status xray
+
 
 echo -e "\n✅ \e[1;32mXray instalado com sucesso na porta $porta!\e[0m"
