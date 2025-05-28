@@ -25,6 +25,25 @@ limpar_instalacao_antiga() {
   sudo rm -rf /usr/local/etc/xray
   sudo rm -f /etc/systemd/system/xray.service
   sudo rm -f /etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf
+sudo systemctl stop xray
+sudo systemctl disable xray
+sudo systemctl stop xray@.service
+sudo systemctl disable xray@.service
+
+# Remover arquivos de serviço e diretórios systemd relacionados ao Xray
+sudo rm -rf /etc/systemd/system/xray.service.d
+sudo rm -rf /etc/systemd/system/xray@.service.d
+sudo rm -f /etc/systemd/system/xray@.service
+
+# Remover arquivos de configuração do Xray
+sudo rm -rf /usr/local/etc/xray
+
+# Remover binário do Xray (se existir)
+which xray        # verificar localização do binário
+sudo rm -f /usr/local/bin/xray  # remover binário (exemplo de caminho)
+
+# Recarregar o systemd para aplicar alterações
+sudo systemctl daemon-reload
 }
 
 # Função de instalação
