@@ -146,6 +146,8 @@ preparar_logs() {
   echo -e "\n🗂️ Criando diretório de log e ajustando permissões..."
   sudo mkdir -p /var/log/v2ray
   sudo chown nobody:nogroup /var/log/v2ray
+  chown -R xray:xray /var/log/v2ray
+  systemctl restart xray
 }
 
 # Iniciar serviço
